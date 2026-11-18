@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>PARHELION Audio Samples</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff; --fg: #1d1d1f; --muted: #5f6368; --line: #e3e3e6;
+    --head: #f5f5f7; --accent: #2f5f98; --row: #fafafb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416; --fg: #ececf0; --muted: #a0a0a8; --line: #2c2c31;
+      --head: #1d1d21; --accent: #8fb4e3; --row: #18181b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 48px 20px 64px; }
+  h1 { font-size: 1.6rem; line-height: 1.3; margin: 0 0 8px; }
+  h2 { font-size: 1.25rem; margin: 48px 0 6px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  p { max-width: 760px; }
+  .note { color: var(--muted); font-size: 0.92rem; }
+  nav a { color: var(--accent); margin-right: 18px; text-decoration: none; font-weight: 600; }
+  nav a:hover { text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+  th { background: var(--head); font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+  tbody tr:nth-child(even) { background: var(--row); }
+  th:first-child { width: 140px; }
+  td.id { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  audio { width: 100%; min-width: 180px; height: 36px; display: block; }
+  @media (max-width: 720px) {
+    thead { display: none; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    tr { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 14px; padding: 6px 4px; }
+    td { border: 0; padding: 6px 10px; }
+    td[data-label]::before { content: attr(data-label); display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>PARHELION: Generator-Agnostic and Transferable Music Protection via Representation-Diverse Encoder Ensembles</h1>
+  <p class="sub">Audio samples for the anonymous submission. Headphones are recommended.</p>
+  <nav>
+    <a href="#imperceptibility">Imperceptibility</a>
+    <a href="#mimicry">Mimicry</a>
+  </nav>
+
+  <h2 id="imperceptibility">1. Imperceptibility: original vs. protected</h2>
+  <p>Each row plays an original track and the same track after protection.
+     The protection is meant to be inaudible.</p>
+  <table>
+    <thead><tr><th>Track</th><th>Original</th><th>Protected</th></tr></thead>
+    <tbody id="imperceptibility-rows"></tbody>
+  </table>
+
+  <h2 id="mimicry">2. Mimicry: music generated from original vs. protected audio</h2>
+  <p>The reference is an excerpt of the original track.
+     The two generated clips come from the same generator, trained on the original audio or on its protected version.
+     Protection succeeds when the second clip departs from the reference style.</p>
+  <table>
+    <thead><tr><th>Track</th><th>Reference</th><th>Generated from original</th><th>Generated from protected</th></tr></thead>
+    <tbody id="mimicry-rows"></tbody>
+  </table>
+
+  <p class="note">Audio files: <code>&lt;track&gt;_1</code> original, <code>_2</code> protected,
+     <code>_3</code> generated from original, <code>_4</code> generated from protected, <code>_5</code> reference.</p>
+</main>
+
+<script>
+  // Track lists. Remove an ID here to hide it from the page.
+  const IMPERCEPTIBILITY = ["000002", "000005", "000010", "000194", "000203",
+                            "000625", "000704", "000705", "000821", "000892"];
+  const MIMICRY = ["000005", "000141", "000200", "000546", "000625", "000676",
+                   "000705", "000706", "000709", "001082", "001277", "001644"];
+
+  function cell(label, file) {
+    const td = document.createElement("td");
+    td.dataset.label = label;
+    const a = document.createElement("audio");
+    a.controls = true;
+    a.preload = "none";
+    a.src = "audio/" + file + ".mp3";
+    td.appendChild(a);
+    return td;
+  }
+
+  function fill(id, tracks, columns) {
+    const body = document.getElementById(id);
+    for (const t of tracks) {
+      const tr = document.createElement("tr");
+      const name = document.createElement("td");
+      name.className = "id";
+      name.textContent = "Track " + t;
+      tr.appendChild(name);
+      for (const [label, idx] of columns) tr.appendChild(cell(label, t + "_" + idx));
+      body.appendChild(tr);
+    }
+  }
+
+  fill("imperceptibility-rows", IMPERCEPTIBILITY, [["Original", 1], ["Protected", 2]]);
+  fill("mimicry-rows", MIMICRY, [["Reference", 5], ["Generated from original", 3], ["Generated from protected", 4]]);
+
+  // Play one clip at a time.
+  document.addEventListener("play", e => {
+    for (const a of document.querySelectorAll("audio")) if (a !== e.target) a.pause();
+  }, true);
+</script>
+</body>
+</html>
